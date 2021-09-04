@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from rover.models import CardinalDirection, Vehicle
+from rover.models import CardinalDirection, Vehicle, VehicleInstruction
 from tests.factories import VehicleFactory
 
 
@@ -83,3 +83,23 @@ class TestVehicle:
             v.move_forward()
             mock_forward_position.assert_called_once()
         assert v.position == position
+
+
+class TestVehicleInstruction:
+    def test_move_forward(self):
+        v: Vehicle = VehicleFactory()
+        with mock.patch("rover.models.Vehicle.move_forward") as mock_move_forward:
+            VehicleInstruction.MOVE_FORWARD.action(v)
+            mock_move_forward.assert_called_once()
+
+    def test_rotate_clockwise(self):
+        v: Vehicle = VehicleFactory()
+        with mock.patch("rover.models.Vehicle.rotate_clockwise") as mock_rotate_clockwise:
+            VehicleInstruction.ROTATE_CLOCKWISE.action(v)
+            mock_rotate_clockwise.assert_called_once()
+
+    def test_rotate_counter_clockwise(self):
+        v: Vehicle = VehicleFactory()
+        with mock.patch("rover.models.Vehicle.rotate_counter_clockwise") as mock_rotate_counter_clockwise:
+            VehicleInstruction.ROTATE_COUNTER_CLOCKWISE.action(v)
+            mock_rotate_counter_clockwise.assert_called_once()

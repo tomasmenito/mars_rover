@@ -1,4 +1,15 @@
 from enum import Enum
+from typing import Callable
+
+
+class VehicleInstruction(Enum):
+    def __init__(self, sign: str, action: Callable):
+        self.sign = sign
+        self.action = action
+
+    MOVE_FORWARD = ("M", lambda vehicle: vehicle.move_forward())
+    ROTATE_CLOCKWISE = ("L", lambda vehicle: vehicle.rotate_clockwise())
+    ROTATE_COUNTER_CLOCKWISE = ("R", lambda vehicle: vehicle.rotate_counter_clockwise())
 
 
 class CardinalDirection(Enum):
@@ -57,13 +68,8 @@ class Rover(Vehicle):
         self.name = name
         self.plateau_dimensions = plateau_dimensions
 
-    def execute_instruction(self, instruction: str):
-        if instruction == "M":
-            self.move_forward()
-        elif instruction == "L":
-            self.rotate_clockwise()
-        elif instruction == "R":
-            self.rotate_counter_clockwise()
+    def execute_instruction(self, instruction: VehicleInstruction):
+        instruction.action(self)
 
     def __str__(self):
         return f"{self.name}: {self.position[0]} {self.position[1]} {self.direction}"
