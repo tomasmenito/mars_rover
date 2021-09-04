@@ -8,4 +8,4 @@ class VehicleFactory(factory.Factory):
         model = Vehicle
 
     position = (0, 0)
-    direction = CardinalDirection.NORTH
+    direction = factory.Faker("random_element", elements=list(CardinalDirection))
