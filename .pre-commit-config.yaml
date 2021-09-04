@@ -1,0 +1,23 @@
+repos:
+- repo: git@github.com:pre-commit/pre-commit-hooks
+  rev: v4.0.1
+  hooks:
+    - id: end-of-file-fixer
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 3.9.2
+  hooks:
+    - id: flake8
+      args: ['--exclude=docs/*,*migrations*', '--ignore=E501,W503,E203']
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.9.3
+  hooks:
+    - id: isort
+      additional_dependencies: ['toml']
+
+
+- repo: https://github.com/psf/black
+  rev: 21.8b0
+  hooks:
+    - id: black
