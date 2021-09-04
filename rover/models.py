@@ -2,15 +2,14 @@ from enum import Enum
 
 
 class CardinalDirection(Enum):
-    def __init__(self, sign: str, x: int, y: int):
+    def __init__(self, sign: str, vector: tuple[int, int]):
         self.sign = sign
-        self.x = x
-        self.y = y
+        self.vector = vector
 
-    NORTH = ("N", 0, 1)
-    EAST = ("E", 1, 0)
-    SOUTH = ("S", 0, -1)
-    WEST = ("W", -1, 0)
+    NORTH = ("N", (0, 1))
+    EAST = ("E", (1, 0))
+    SOUTH = ("S", (0, -1))
+    WEST = ("W", (-1, 0))
 
     @property
     def clockwise_next(self):
@@ -26,29 +25,29 @@ class CardinalDirection(Enum):
 
 
 class Vehicle:
-    def __init__(self, position: tuple[int, int], direction: str):
+    def __init__(self, position: tuple[int, int], direction: CardinalDirection):
         self.position = position
         self.direction = direction
 
-    def rotate(self, clockwise: bool):
-        seq = "NESW"
-        current_index = seq.index(self.direction)
-        increment = 1 if clockwise else -1
+    def rotate_clockwise(self):
+        self.direction = self.direction.clockwise_next
 
-        new_index = (current_index + increment) % len(seq)
+    def rotate_counter_clockwise(self):
+        self.direction = self.direction.clockwise_previous
 
-        self.direction = seq[new_index]
-
-    def move(self):
-        move_directions = {"N": (0, 1), "S": (0, -1), "E": (1, 0), "W": (-1, 0)}
-
-        delta_x, delta_y = move_directions[self.direction]
-        self.position = self.position[0] + delta_x, self.position[1] + delta_y
+    def move_forward(self):
+        new_x = self.position[0] + self.direction.vector[0]
+        new_y = self.position[1] + self.direction.vector[1]
+        self.position = new_x, new_y
 
 
 class Rover(Vehicle):
     def __init__(
-        self, name: str, position: tuple[int, int], direction: str, plateau_dimensions: tuple[int, int]
+        self,
+        name: str,
+        position: tuple[int, int],
+        direction: CardinalDirection,
+        plateau_dimensions: tuple[int, int],
     ):
         super().__init__(position, direction)
         self.name = name
@@ -56,11 +55,11 @@ class Rover(Vehicle):
 
     def execute_instruction(self, instruction: str):
         if instruction == "M":
-            self.move()
+            self.move_forward()
         elif instruction == "L":
-            self.rotate(clockwise=False)
+            self.rotate_clockwise()
         elif instruction == "R":
-            self.rotate(clockwise=True)
+            self.rotate_counter_clockwise()
 
     def __str__(self):
         return f"{self.name}: {self.position[0]} {self.position[1]} {self.direction}"
