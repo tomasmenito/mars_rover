@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from rover.models import CardinalDirection, Vehicle
@@ -68,8 +70,16 @@ class TestVehicle:
             (CardinalDirection.WEST, (0, 0), (-1, 0)),
         ],
     )
-    def test_move_forward(self, direction, position, expected):
+    def test_forward_position(self, direction, position, expected):
         v: Vehicle = VehicleFactory(direction=direction, position=position)
-        v.move_forward()
-        assert v.position == expected
-        assert v.direction == direction
+        assert v.forward_position == expected
+
+    def test_move_forward(self, faker):
+        position = faker.pyint(), faker.pyint()
+        v: Vehicle = VehicleFactory()
+        with mock.patch(
+            "rover.models.Vehicle.forward_position", return_value=position, new_callable=mock.PropertyMock
+        ) as mock_forward_position:
+            v.move_forward()
+            mock_forward_position.assert_called_once()
+        assert v.position == position

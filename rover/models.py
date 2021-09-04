@@ -35,10 +35,14 @@ class Vehicle:
     def rotate_counter_clockwise(self):
         self.direction = self.direction.clockwise_previous
 
-    def move_forward(self):
+    @property
+    def forward_position(self) -> tuple[int, int]:
         new_x = self.position[0] + self.direction.vector[0]
         new_y = self.position[1] + self.direction.vector[1]
-        self.position = new_x, new_y
+        return new_x, new_y
+
+    def move_forward(self):
+        self.position = self.forward_position
 
 
 class Rover(Vehicle):
