@@ -1,3 +1,30 @@
+from enum import Enum
+
+
+class CardinalDirection(Enum):
+    def __init__(self, sign: str, x: int, y: int):
+        self.sign = sign
+        self.x = x
+        self.y = y
+
+    NORTH = ("N", 0, 1)
+    EAST = ("E", 1, 0)
+    SOUTH = ("S", 0, -1)
+    WEST = ("W", -1, 0)
+
+    @property
+    def clockwise_next(self):
+        options = list(CardinalDirection)
+        index = options.index(self)
+        return options[(index + 1) % len(options)]
+
+    @property
+    def clockwise_previous(self):
+        options = list(CardinalDirection)
+        index = options.index(self)
+        return options[index - 1]
+
+
 class Vehicle:
     def __init__(self, position: tuple[int, int], direction: str):
         self.position = position
