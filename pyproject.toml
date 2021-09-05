@@ -19,6 +19,7 @@ authors = ["Tomas Menito <tomasmenito@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+click = "^8.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest-randomly = "^3.10.1"
