@@ -12,12 +12,7 @@ ROVER_INSTRUCTIONS_RE = re.compile(r"(?P<name>\w+)\s*Instructions:(?P<instructio
 
 
 @click.command()
-@click.argument(
-    "--input-file",
-    required=True,
-    type=click.File(mode="r"),
-    help="Input file containing the scenario to be simulated",
-)
+@click.argument("input-file", required=True, type=click.File(mode="r"))
 def parse_input(input_file):
     plateau_dimensions = None
     rovers_data = defaultdict(dict)
