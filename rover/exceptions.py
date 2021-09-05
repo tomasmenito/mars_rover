@@ -1,0 +1,2 @@
+class PositionOutOfNavigableAreaError(ValueError):
+    pass

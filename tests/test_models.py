@@ -1,9 +1,11 @@
+from contextlib import nullcontext as does_not_raise
 from unittest import mock
 
 import pytest
 
-from rover.models import CardinalDirection, Rover, Vehicle, VehicleInstruction
-from tests.factories import RoverFactory, VehicleFactory
+from rover.exceptions import PositionOutOfNavigableAreaError
+from rover.models import CardinalDirection, RestrictedNavigationVehicle, Rover, Vehicle, VehicleInstruction
+from tests.factories import RestrictedNavigationVehicleFactory, RoverFactory, VehicleFactory
 
 
 class TestCardinalDirection:
@@ -122,8 +124,43 @@ class TestRover:
 
     def test_rover_move_forward(self, faker):
         position = faker.pyint(), faker.pyint()
-        rover: Rover = RoverFactory(position=position, direction=CardinalDirection.NORTH)
+        navigable_area = position[0] + 2, position[1] + 2
+        rover: Rover = RoverFactory(
+            position=position, direction=CardinalDirection.NORTH, navigable_area=navigable_area
+        )
 
         previous_position = rover.position
         rover.execute_instruction(VehicleInstruction.MOVE_FORWARD)
         assert rover.position == (previous_position[0], (previous_position[1] + 1))
+
+
+class TestRestrictedNavigationVehicle:
+    @pytest.mark.parametrize(
+        "is_navigable, expected",
+        [
+            (True, does_not_raise()),
+            (False, pytest.raises(PositionOutOfNavigableAreaError)),
+        ],
+    )
+    def test_move_forward(self, is_navigable, expected):
+        v: RestrictedNavigationVehicle = RestrictedNavigationVehicleFactory()
+        with mock.patch(
+            "rover.models.RestrictedNavigationVehicle.is_navigable", return_value=is_navigable
+        ) as mock_is_navigable:
+            with expected:
+                v.move_forward()
+            mock_is_navigable.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "position, navigable_area, expected",
+        [
+            ((0, 0), (1, 1), True),
+            ((10, 10), (15, 15), True),
+            ((1, 0), (1, 1), False),
+            ((0, 1), (1, 1), False),
+            ((0, 0), (0, 0), False),
+        ],
+    )
+    def test_is_navigable(self, position, navigable_area, expected):
+        v: RestrictedNavigationVehicle = RestrictedNavigationVehicleFactory(navigable_area=navigable_area)
+        assert v.is_navigable(position) is expected

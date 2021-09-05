@@ -1,11 +1,14 @@
+import logging
 import re
 from collections import defaultdict
 from typing import Iterable
 
 import click
 
+from rover.exceptions import PositionOutOfNavigableAreaError
 from rover.models import CardinalDirection, Rover, VehicleInstruction
 
+logger = logging.getLogger()
 PLATEAU_RE = re.compile(r"Plateau:(?P<width>\d)\s*(?P<height>\d)")
 ROVER_LANDING_RE = re.compile(r"(?P<name>\w+)\s*Landing:(?P<x>\d+)\s*(?P<y>\d+)\s*(?P<direction>[NESW])")
 ROVER_INSTRUCTIONS_RE = re.compile(r"(?P<name>\w+)\s*Instructions:(?P<instructions>[MRL]+)")
@@ -44,7 +47,8 @@ def parse_input(input_file):
         return
     for rover in process_scenario(rovers_data, plateau_dimensions):
         click.secho(
-            f"{rover.name}: {rover.position[0]} {rover.position[1]} {rover.direction.sign}", fg="blue"
+            f"{rover.name} terminal position: {rover.position[0]} {rover.position[1]} {rover.direction.sign}",
+            fg="blue",
         )
 
 
@@ -54,11 +58,15 @@ def process_scenario(rovers_data, plateau_dimensions) -> Iterable[Rover]:
             name=rover_name,
             position=data["position"],
             direction=CardinalDirection(data["direction"]),
-            plateau_dimensions=plateau_dimensions,
+            navigable_area=plateau_dimensions,
         )
 
-        for instruction in data.get("instructions", []):
-            rover.execute_instruction(VehicleInstruction(instruction))
+        for instruction_sign in data.get("instructions", []):
+            instruction = VehicleInstruction(instruction_sign)
+            try:
+                rover.execute_instruction(instruction)
+            except PositionOutOfNavigableAreaError as e:
+                logger.warning(f"Could not execute instruction {instruction} due to {e}")
 
         yield rover
 

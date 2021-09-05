@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Callable
 
+from rover.exceptions import PositionOutOfNavigableAreaError
+
 
 class VehicleInstruction(str, Enum):
     def __new__(cls, sign: str, action: Callable):
@@ -66,17 +68,34 @@ class Vehicle:
         self.position = self.forward_position
 
 
-class Rover(Vehicle):
+class RestrictedNavigationVehicle(Vehicle):
+    def __init__(
+        self, position: tuple[int, int], direction: CardinalDirection, navigable_area: tuple[int, int]
+    ):
+        super().__init__(position, direction)
+        self.navigable_area = navigable_area
+
+    def move_forward(self):
+        desired_position = self.forward_position
+        if not self.is_navigable(desired_position):
+            raise PositionOutOfNavigableAreaError(f"Position {desired_position} is not navigable")
+
+        super().move_forward()
+
+    def is_navigable(self, position: tuple[int, int]) -> bool:
+        return position[0] < self.navigable_area[0] and position[1] < self.navigable_area[1]
+
+
+class Rover(RestrictedNavigationVehicle):
     def __init__(
         self,
         name: str,
         position: tuple[int, int],
         direction: CardinalDirection,
-        plateau_dimensions: tuple[int, int],
+        navigable_area: tuple[int, int],
     ):
-        super().__init__(position, direction)
+        super().__init__(position, direction, navigable_area)
         self.name = name
-        self.plateau_dimensions = plateau_dimensions
 
     def execute_instruction(self, instruction: VehicleInstruction):
         instruction.action(self)
