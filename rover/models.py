@@ -2,7 +2,12 @@ from enum import Enum
 from typing import Callable
 
 
-class VehicleInstruction(Enum):
+class VehicleInstruction(str, Enum):
+    def __new__(cls, sign: str, action: Callable):
+        obj = str.__new__(cls, sign)
+        obj._value_ = sign
+        return obj
+
     def __init__(self, sign: str, action: Callable):
         self.sign = sign
         self.action = action
@@ -12,7 +17,12 @@ class VehicleInstruction(Enum):
     ROTATE_COUNTER_CLOCKWISE = ("R", lambda vehicle: vehicle.rotate_counter_clockwise())
 
 
-class CardinalDirection(Enum):
+class CardinalDirection(str, Enum):
+    def __new__(cls, sign: str, vector: tuple[int, int]):
+        obj = str.__new__(cls, sign)
+        obj._value_ = sign
+        return obj
+
     def __init__(self, sign: str, vector: tuple[int, int]):
         self.sign = sign
         self.vector = vector
@@ -72,4 +82,4 @@ class Rover(Vehicle):
         instruction.action(self)
 
     def __str__(self):
-        return f"{self.name}: {self.position[0]} {self.position[1]} {self.direction}"
+        return f"{self.name}: {self.position} {self.direction}"
