@@ -4,7 +4,7 @@ from typing import Iterable
 
 import click
 
-from .models import CardinalDirection, Rover, VehicleInstruction
+from rover.models import CardinalDirection, Rover, VehicleInstruction
 
 PLATEAU_RE = re.compile(r"Plateau:(?P<width>\d)\s*(?P<height>\d)")
 ROVER_LANDING_RE = re.compile(r"(?P<name>\w+)\s*Landing:(?P<x>\d+)\s*(?P<y>\d+)\s*(?P<direction>[NESW])")
@@ -12,7 +12,12 @@ ROVER_INSTRUCTIONS_RE = re.compile(r"(?P<name>\w+)\s*Instructions:(?P<instructio
 
 
 @click.command()
-@click.option("--input-file", type=click.File(mode="r"))
+@click.argument(
+    "--input-file",
+    required=True,
+    type=click.File(mode="r"),
+    help="Input file containing the scenario to be simulated",
+)
 def parse_input(input_file):
     plateau_dimensions = None
     rovers_data = defaultdict(dict)
@@ -63,4 +68,5 @@ def process_scenario(rovers_data, plateau_dimensions) -> Iterable[Rover]:
         yield rover
 
 
-parse_input()
+if __name__ == "__main__":
+    parse_input()
