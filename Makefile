@@ -13,4 +13,4 @@ test:
 	pytest .
 
 coverage:
-	pytest --cov .
+	pytest --cov=rover --cov-report term-missing .
